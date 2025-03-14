@@ -16,6 +16,7 @@ from qdrant_client import QdrantClient
 from flare_ai_rag.ai import GeminiEmbedding, GeminiProvider
 from flare_ai_rag.api import ChatRouter
 from flare_ai_rag.attestation import Vtpm
+from flare_ai_rag.bot_manager import start_bot_manager
 from flare_ai_rag.prompts import PromptService
 from flare_ai_rag.responder import GeminiResponder, ResponderConfig
 from flare_ai_rag.retriever import QdrantRetriever, RetrieverConfig, generate_collection
@@ -38,9 +39,7 @@ def setup_router(input_config: dict) -> tuple[GeminiProvider, GeminiRouter]:
         api_key=settings.gemini_api_key, model=router_config.model.model_id
     )
     gemini_router = GeminiRouter(client=gemini_provider, config=router_config)
-
     return gemini_provider, gemini_router
-
 
 def setup_retriever(
     qdrant_client: QdrantClient,
@@ -94,6 +93,7 @@ def setup_responder(input_config: dict) -> GeminiResponder:
         model=responder_config.model.model_id,
         system_instruction=responder_config.system_prompt,
     )
+
     return GeminiResponder(client=gemini_provider, responder_config=responder_config)
 
 
@@ -152,6 +152,7 @@ def create_app() -> FastAPI:
         attestation=Vtpm(simulate=settings.simulate_attestation),
         prompts=PromptService(),
     )
+
     app.include_router(chat_router.router, prefix="/api/routes/chat", tags=["chat"])
 
     return app
@@ -169,3 +170,4 @@ def start() -> None:
 
 if __name__ == "__main__":
     start()
+    start_bot_manager()

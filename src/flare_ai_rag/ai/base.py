@@ -67,6 +67,7 @@ class BaseAIProvider(ABC):
             ModelResponse containing the generated text and metadata
         """
 
+
     @abstractmethod
     def send_message(self, msg: str) -> ModelResponse:
         """Send a message in a conversational context

@@ -17,6 +17,10 @@ dependencies = [
     "qdrant-client>=1.13.2",
     "structlog>=25.1.0",
     "uvicorn>=0.34.0",
+    "python-telegram-bot>=21.11.1", 
+    "aiohttp>=3.11.13",
+    "seaborn>=0.13.2",
+    "matplotlib>=3.10.1"
 ]
 
 [dependency-groups]

@@ -3,7 +3,7 @@ import { Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import './index.css';
 
-const BACKEND_ROUTE = "api/routes/chat/";
+const BACKEND_ROUTE = "/api/routes/chat/";
 
 const ChatInterface = () => {
   const [messages, setMessages] = useState([

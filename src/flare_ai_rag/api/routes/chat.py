@@ -12,7 +12,6 @@ from flare_ai_rag.router import GeminiRouter
 logger = structlog.get_logger(__name__)
 router = APIRouter()
 
-
 class ChatMessage(BaseModel):
     """
     Pydantic model for chat message validation.

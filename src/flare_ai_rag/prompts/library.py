@@ -24,6 +24,9 @@ from flare_ai_rag.prompts.templates import (
     RAG_ROUTER,
     REMOTE_ATTESTATION,
     SEMANTIC_ROUTER,
+    FEW_SHOT_PROMPT,
+    CHAIN_OF_THOUGHT_PROMPT,
+    ZERO_SHOT_PROMPT
 )
 
 logger = structlog.get_logger(__name__)
