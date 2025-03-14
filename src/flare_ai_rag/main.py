@@ -114,6 +114,11 @@ def create_app() -> FastAPI:
     """
     app = FastAPI(title="RAG Knowledge API", version="1.0", redirect_slashes=False)
 
+    # Add health check endpoint
+    @app.get("/health")
+    async def health_check():
+        return {"status": "healthy"}
+
     # Optional: configure CORS middleware using settings.
     app.add_middleware(
         CORSMiddleware,
@@ -123,36 +128,47 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Load input configuration.
-    input_config = load_json(settings.input_path / "input_parameters.json")
+    try:
+        # Load input configuration.
+        input_config = load_json(settings.input_path / "input_parameters.json")
+        logger.info("Loaded input configuration successfully")
 
-    # Load RAG data.
-    df_docs = pd.read_csv(settings.data_path / "docs.csv", delimiter=",")
-    logger.info("Loaded CSV Data.", num_rows=len(df_docs))
+        # Load RAG data.
+        df_docs = pd.read_csv(settings.data_path / "docs.csv", delimiter=",")
+        logger.info("Loaded CSV Data.", num_rows=len(df_docs))
 
-    # Set up the RAG components: 1. Gemini Provider
-    base_ai, router_component = setup_router(input_config)
+        # Set up the RAG components: 1. Gemini Provider
+        base_ai, router_component = setup_router(input_config)
+        logger.info("Router component initialized successfully")
 
-    # 2a. Set up Qdrant client.
-    qdrant_client = setup_qdrant(input_config)
+        # 2a. Set up Qdrant client.
+        qdrant_client = setup_qdrant(input_config)
+        logger.info("Qdrant client initialized successfully")
 
-    # 2b. Set up the Retriever.
-    retriever_component = setup_retriever(qdrant_client, input_config, df_docs)
+        # 2b. Set up the Retriever.
+        retriever_component = setup_retriever(qdrant_client, input_config, df_docs)
+        logger.info("Retriever component initialized successfully")
 
-    # 3. Set up the Responder.
-    responder_component = setup_responder(input_config)
+        # 3. Set up the Responder.
+        responder_component = setup_responder(input_config)
+        logger.info("Responder component initialized successfully")
 
-    # Create an APIRouter for chat endpoints and initialize ChatRouter.
-    chat_router = ChatRouter(
-        router=APIRouter(),
-        ai=base_ai,
-        query_router=router_component,
-        retriever=retriever_component,
-        responder=responder_component,
-        attestation=Vtpm(simulate=settings.simulate_attestation),
-        prompts=PromptService(),
-    )
-    app.include_router(chat_router.router, prefix="/api/routes/chat", tags=["chat"])
+        # Create an APIRouter for chat endpoints and initialize ChatRouter.
+        chat_router = ChatRouter(
+            router=APIRouter(),
+            ai=base_ai,
+            query_router=router_component,
+            retriever=retriever_component,
+            responder=responder_component,
+            attestation=Vtpm(simulate=settings.simulate_attestation),
+            prompts=PromptService(),
+        )
+        app.include_router(chat_router.router, prefix="/api/routes/chat", tags=["chat"])
+        logger.info("Chat router initialized and endpoints registered")
+
+    except Exception as e:
+        logger.error(f"Error initializing application: {str(e)}")
+        raise
 
     return app
 
@@ -164,7 +180,12 @@ def start() -> None:
     """
     Start the FastAPI application server.
     """
-    uvicorn.run(app, host="0.0.0.0", port=8080)  # noqa: S104
+    try:
+        logger.info("Starting FastAPI application on port 8000")
+        uvicorn.run(app, host="0.0.0.0", port=8000)  # noqa: S104
+    except Exception as e:
+        logger.error(f"Failed to start application: {str(e)}")
+        raise
 
 
 if __name__ == "__main__":
